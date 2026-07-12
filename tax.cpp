@@ -6,19 +6,27 @@ using namespace std;
 class TaxPayer{
   private:
     string name;
-    int salary;
-  public:
-    int setSalary(int s){
-      return  salary = s;
+    int taxableIncome;
+   public:
+    int setIncome(int s){
+      return  taxableIncome = s;
     }
-    int getSalary(){
-      return salary;
+    int getIncome(){
+      return taxableIncome;
     }
+};
+
+class NonIndividual: public TaxPayer{
+
+};
+
+class Individual: public TaxPayer{
+ 
 };
 
 int main(){
   TaxPayer me;
-  me.setSalary(100000);
-  cout << me.getSalary();
+  me.setIncome(100000);
+  cout << me.getIncome();
   return 0;
 }
