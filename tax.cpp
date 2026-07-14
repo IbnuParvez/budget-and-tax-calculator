@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
-#include <iomanip>
+#include <iomanip> //this is for limiting the number of decimal numbers
+#include <algorithm> // thid is for the min() function which selects the smaller of two numbers
 
 using namespace std;
 
@@ -24,6 +25,7 @@ double taxableIncome;
 
 class NonIndividual: public TaxPayer{
   NonIndividual(){
+
      }
 };
 
@@ -31,18 +33,24 @@ class Individual: public TaxPayer{
   public:
  Individual(double startingIncome){
    taxableIncome = startingIncome;
-       if (taxableIncome >800000.0) {
-       tax = taxableIncome * 0.35;
-    }else if (taxableIncome>=500001.0) {
-      tax = taxableIncome * 0.325;
-    }else if (taxableIncome >= 32334.0) {
-      tax = taxableIncome * 0.3;
-    }else if (taxableIncome>=24001.0) {
-      tax = taxableIncome * 0.25;
-    }else {
-      tax = taxableIncome * 0.1;
-    }
+    double remainingIncome = taxableIncome;
 
+    double limits[] = {24000.0, 8333.33, 467666.67, 300000.0};
+
+    double rates[]  = {0.10, 0.25, 0.30, 0.325};
+
+    for (int i = 0; i < 4 && remainingIncome>0; i++) {
+      double amountToTax = min(remainingIncome,limits[i]);
+      tax+= amountToTax*rates[i];
+      remainingIncome-=amountToTax;
+    }
+    if (remainingIncome >0) {
+      tax+=remainingIncome*0.35;
+    }
+    tax-=2400.0;
+    if (tax<0) {
+      tax =0.;
+    }
  }
 };
 
