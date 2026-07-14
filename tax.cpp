@@ -28,7 +28,7 @@ class NonIndividual: public TaxPayer{
   NonIndividual(double totalIncome){
     taxableIncome = totalIncome;
     bool local;
-      cout << "\nare you a local company(1 for yes and 0 for no: ";
+      cout << "\nare you a local company(1 for yes and 0 for no): ";
       cin >> local;
      if (local) {
        tax = totalIncome *0.3;
@@ -64,11 +64,19 @@ class Individual: public TaxPayer{
 };
 
 int main(){
-  Individual me(100000);
-  cout << me.getTaxableIncome()<<endl;
+  bool identity;
+  double income;
+  cout << "are you an Individual(1 for yes and 0 for no)? ";
+  cin >> identity;
+  cout<< "\nwhat is your annual income(1 for yes and 0 for no)? ";
+  cin >> income;
+  if (identity) {
+    Individual me(income);
   cout <<fixed<<setprecision(3)<< me.getTax();
-  NonIndividual us(100000000.0);
-  cout << us.getTaxableIncome()<<endl;
-  cout <<fixed<<setprecision(3)<< us.getTax();
-return 0;
+  }else{
+    NonIndividual us(income);
+   cout <<fixed<<setprecision(3)<< us.getTax();
+
+  }
+   return 0;
 }
