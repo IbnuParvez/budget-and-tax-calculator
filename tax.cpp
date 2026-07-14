@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include <iomanip> //this is for limiting the number of decimal numbers
-#include <algorithm> // thid is for the min() function which selects the smaller of two numbers
+#include <iomanip> //this is for limiting the number of decimal numbers ili tusipate many decimal points
+#include <algorithm> // hii ni  for the min() function which selects the smaller of two numbers
 
 using namespace std;
 
@@ -24,9 +24,18 @@ double taxableIncome;
 };
 
 class NonIndividual: public TaxPayer{
-  NonIndividual(){
-
+  public:
+  NonIndividual(double totalIncome){
+    taxableIncome = totalIncome;
+    bool local;
+      cout << "\nare you a local company(1 for yes and 0 for no: ";
+      cin >> local;
+     if (local) {
+       tax = totalIncome *0.3;
+     }else {
+       tax = totalIncome*0.375;
      }
+  }
 };
 
 class Individual: public TaxPayer{
@@ -58,5 +67,8 @@ int main(){
   Individual me(100000);
   cout << me.getTaxableIncome()<<endl;
   cout <<fixed<<setprecision(3)<< me.getTax();
-  return 0;
+  NonIndividual us(100000000.0);
+  cout << us.getTaxableIncome()<<endl;
+  cout <<fixed<<setprecision(3)<< us.getTax();
+return 0;
 }
