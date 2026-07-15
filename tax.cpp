@@ -6,12 +6,11 @@
 using namespace std;
 
 class TaxPayer{
-  private:
-    string name;
-    
-   public:
-double taxableIncome;
+  protected: 
+    double taxableIncome;
     double tax;
+   public:
+
     double setTaxableIncome(double s){
       return  taxableIncome = s;
     }
@@ -68,7 +67,7 @@ int main(){
   double income;
   cout << "are you an Individual(1 for yes and 0 for no)? ";
   cin >> identity;
-  cout<< "\nwhat is your annual income(1 for yes and 0 for no)? ";
+  cout<< "\nwhat is your annual income? ";
   cin >> income;
   if (identity) {
     Individual me(income);
