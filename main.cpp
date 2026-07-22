@@ -331,7 +331,7 @@ int main() {
         printBanner("WELCOME TO THE LOGIN PAGE");
         cout << "| Press 1 to LOGIN                       |\n";
         cout << "| Press 2 to REGISTER                    |\n";
-        cout << "| Press 3 if you forgot your PASSWORD    |\n";
+        cout << "| Press 3 to UPDATE YOUR PASSWORD    |\n";
         cout << "| Press 4 to VIEW REGISTERED USERS       |\n";
         cout << "| Press 5 to DELETE A USER               |\n";
         cout << "| Press 6 to EXIT                        |\n";
