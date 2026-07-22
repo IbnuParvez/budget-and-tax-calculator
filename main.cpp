@@ -10,10 +10,9 @@
 #include "MoneyFormat.h"
 #include "Budget.h"
 #include "History.h"
+#include "Database.h"
 
 using namespace std;
-
-const string USER_FILE = "records.txt";
 
 void printBanner(const string& title) {
     cout << "\n\n=================================================\n";
@@ -89,11 +88,8 @@ void deleteUserMenu(AuthManager& auth) {
 
     if (auth.deleteUser(uname, pwd, passphrase)) {
         cout << "\nUser \"" << uname << "\" has been deleted.\n";
-
-        // Also remove that user's saved history so nothing orphaned is left
-        // behind for a username that no longer exists.
-        string historyFile = "history_" + uname + ".txt";
-        remove(historyFile.c_str());
+        // That user's saved history is removed automatically by the
+        // `history` table's ON DELETE CASCADE foreign key - see Database.cpp.
     } else {
         cout << "\nCould not delete: username, password, or passphrase was incorrect.\n";
     }
@@ -200,8 +196,8 @@ void runCalculation(HistoryManager& history) {
 // The user lands here after logging in and STAYS here - calculating again,
 // checking history, or logging out are all just menu options, none of them
 // throw the user back to the login screen except logout.
-void dashboardMenu(const string& username, AuthManager& auth) {
-    HistoryManager history(username);
+void dashboardMenu(const string& username, AuthManager& auth, Database& db) {
+    HistoryManager history(db, username);
     history.load();
 
     int choice;
@@ -249,7 +245,7 @@ void dashboardMenu(const string& username, AuthManager& auth) {
     }
 }
 
-void loginMenu(AuthManager& auth) {
+void loginMenu(AuthManager& auth, Database& db) {
     string uname, pwd;
 
     printBanner("LOGIN");
@@ -260,7 +256,7 @@ void loginMenu(AuthManager& auth) {
 
     if (auth.loginUser(uname, pwd)) {
         cout << "\n" << uname << ", your LOGIN was successful! Thanks for logging in!\n";
-        dashboardMenu(uname, auth);
+        dashboardMenu(uname, auth, db);
     } else {
         cout << "\nLOGIN ERROR. Please check your username and password.\n";
     }
@@ -323,7 +319,17 @@ void forgotMenu(AuthManager& auth) {
 int main() {
     cout << fixed << setprecision(2);   // normal decimal formatting, no scientific notation
 
-    AuthManager auth(USER_FILE);
+    Database db;
+    try {
+        db.connect();
+    } catch (const DatabaseError& e) {
+        cerr << "\nCould not start: " << e.what() << "\n";
+        cerr << "Check that MySQL is running and DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME "
+                "are set correctly (see README).\n";
+        return 1;
+    }
+
+    AuthManager auth(db);
     auth.loadFromFile();
 
     int c;
@@ -331,7 +337,7 @@ int main() {
         printBanner("WELCOME TO THE LOGIN PAGE");
         cout << "| Press 1 to LOGIN                       |\n";
         cout << "| Press 2 to REGISTER                    |\n";
-        cout << "| Press 3 if you forgot your PASSWORD    |\n";
+        cout << "| Press 3 to UPDATE YOUR PASSWORD    |\n";
         cout << "| Press 4 to VIEW REGISTERED USERS       |\n";
         cout << "| Press 5 to DELETE A USER               |\n";
         cout << "| Press 6 to EXIT                        |\n";
@@ -346,7 +352,7 @@ int main() {
         }
 
         switch (c) {
-            case 1: loginMenu(auth); break;
+            case 1: loginMenu(auth, db); break;
             case 2: registrationMenu(auth); break;
             case 3: forgotMenu(auth); break;
             case 4: viewUsersMenu(auth); break;
