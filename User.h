@@ -2,7 +2,7 @@
 #include <string>
 
 // Stores one user's credentials. Password and passphrase are stored as
-// plain text in this simple version of the project (no hashing).
+// plain text in this simple version of the project (no hashing) to avoid complexities
 class User {
 private:
     std::string username;

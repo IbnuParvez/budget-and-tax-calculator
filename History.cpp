@@ -1,54 +1,33 @@
 #include "History.h"
 #include "BarGraph.h"
+#include <fstream>
 #include <iostream>
 #include <iomanip>
 using namespace std;
 
-namespace {
-    // Pulls this user's history rows out in insertion order - shared by
-    // showHistoryGraphs() (needs all of them) and the trend line (needs the
-    // last two), so there's one place that knows how to read the table.
-    vector<HistoryEntry> fetchEntries(Database& db, const string& username) {
-        vector<HistoryEntry> entries;
+HistoryManager::HistoryManager(const string& uname) : username(uname) {
+    filename = "history_" + uname + ".txt";
+}
 
-        string sql = "SELECT income, tax, remaining_income FROM history "
-                     "WHERE username = '" + db.escape(username) + "' ORDER BY id ASC";
-        db.execute(sql);
-
-        MYSQL_RES* res = mysql_store_result(db.handle());
-        if (res) {
-            MYSQL_ROW row;
-            while ((row = mysql_fetch_row(res)) != nullptr) {
-                HistoryEntry e;
-                e.income = row[0] ? atof(row[0]) : 0.0;
-                e.tax = row[1] ? atof(row[1]) : 0.0;
-                e.remainingIncome = row[2] ? atof(row[2]) : 0.0;
-                entries.push_back(e);
-            }
-            mysql_free_result(res);
-        }
-        return entries;
+void HistoryManager::load() {
+    entries.clear();
+    ifstream in(filename);
+    double income, tax, remaining;
+    while (in >> income >> tax >> remaining) {
+        entries.push_back({income, tax, remaining});
     }
 }
 
-HistoryManager::HistoryManager(Database& database, const string& uname) : db(database), username(uname) {}
-
-void HistoryManager::load() {
-    // No-op with MySQL - see the comment on load() in History.h.
-}
-
 void HistoryManager::addEntry(double income, double tax, double remainingIncome) {
-    string sql = "INSERT INTO history (username, income, tax, remaining_income) VALUES ('"
-                 + db.escape(username) + "', "
-                 + to_string(income) + ", "
-                 + to_string(tax) + ", "
-                 + to_string(remainingIncome) + ")";
-    db.execute(sql);
+    entries.push_back({income, tax, remainingIncome});
+
+    ofstream out(filename, ios::app);
+    if (out) {
+        out << income << " " << tax << " " << remainingIncome << "\n";
+    }
 }
 
 void HistoryManager::showHistoryGraphs() const {
-    vector<HistoryEntry> entries = fetchEntries(db, username);
-
     if (entries.empty()) {
         cout << "\nYou don't have any past calculations yet. Run one from the dashboard first.\n";
         return;
@@ -87,6 +66,9 @@ void HistoryManager::showHistoryGraphs() const {
 }
 
 void HistoryManager::clearHistory() {
-    string sql = "DELETE FROM history WHERE username = '" + db.escape(username) + "'";
-    db.execute(sql);
+    entries.clear();
+
+    // Opening in trunc mode with nothing written wipes the file to empty,
+    // same idea as resetPassword rewriting records.txt from scratch.
+    ofstream out(filename, ios::trunc);
 }
